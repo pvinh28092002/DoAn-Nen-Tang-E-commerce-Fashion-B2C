@@ -1,0 +1,13 @@
+# Chặn các file node_modules ở cả FE và BE
+**/node_modules/
+
+# Chặn file .env nằm trong thư mục backend của bạn
+backend/.env
+**/.env
+
+# Chặn thư mục generated của prisma trong backend
+backend/src/generated/prisma/
+
+# Các file rác hệ điều hành
+.DS_Store
+Thumbs.db
