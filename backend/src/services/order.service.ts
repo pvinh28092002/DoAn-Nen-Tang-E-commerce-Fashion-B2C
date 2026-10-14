@@ -277,41 +277,74 @@ export async function updateOrderStatus(
   updateData: OrderStatusData,
 ) {
   const { orderStatus, paymentStatus } = updateData;
+
   if (orderStatus === undefined && paymentStatus === undefined) {
-    throw new AppError(400, "Request could not be empty");
-  }
-  const existingOrder = await prisma.order.findUnique({
-    where: { id: orderId },
-  });
-  if (!existingOrder) {
-    throw new AppError(404, "Order Not Found");
-  }
-  const { status } = existingOrder;
-
-  if (status === "CANCELLED") {
-    throw new AppError(400, "Cannot change the status of a cancelled order");
+    throw new AppError(400, "At least one status must be provided");
   }
 
-  const updatedOrder = await prisma.order.update({
-    where: { id: orderId },
-    data: {
-      ...(orderStatus !== undefined && {
-        status: orderStatus,
-      }),
-      ...(paymentStatus !== undefined && {
-        paymentStatus: paymentStatus,
-        payment: {
-          update: {
-            status: paymentStatus,
-          },
+  // Keep order and payment changes in the same transaction.
+  return prisma.$transaction(
+    async (tx) => {
+      const existingOrder = await tx.order.findUnique({
+        where: { id: orderId },
+        include: { payment: true },
+      });
+
+      if (!existingOrder) {
+        throw new AppError(404, "Order not found");
+      }
+
+      if (existingOrder.status === "CANCELLED") {
+        throw new AppError(
+          400,
+          "Cannot change the status of a cancelled order",
+        );
+      }
+
+      if (orderStatus === "CANCELLED") {
+        throw new AppError(400, "Use the cancellation flow to cancel an order");
+      }
+
+      if (paymentStatus !== undefined && !existingOrder.payment) {
+        throw new AppError(
+          409,
+          "Cannot update payment status because this order has no payment record",
+        );
+      }
+
+      // Update the order fields that were actually provided.
+      const updatedOrder = await tx.order.update({
+        where: { id: orderId },
+        data: {
+          ...(orderStatus !== undefined && {
+            status: orderStatus,
+          }),
+          ...(paymentStatus !== undefined && {
+            paymentStatus,
+          }),
         },
-      }),
-    },
-    include: {
-      items: true,
-      payment: true,
-    },
-  });
+      });
 
-  return updatedOrder;
+      // Update the related payment only when requested.
+      if (paymentStatus !== undefined) {
+        await tx.payment.update({
+          where: { orderId },
+          data: { status: paymentStatus },
+        });
+      }
+
+      // Return the complete updated order.
+      return tx.order.findUnique({
+        where: { id: updatedOrder.id },
+        include: {
+          items: true,
+          payment: true,
+        },
+      });
+    },
+    {
+      maxWait: 10_000,
+      timeout: 20_000,
+    },
+  );
 }

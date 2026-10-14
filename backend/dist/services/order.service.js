@@ -147,7 +147,6 @@ export async function getOrders(userId) {
 }
 export async function cancelOrderById(userId, orderId) {
     return prisma.$transaction(async (tx) => {
-        // Load the order and its item quantities.
         const existingOrder = await tx.order.findFirst({
             where: {
                 id: orderId,
@@ -197,6 +196,9 @@ export async function cancelOrderById(userId, orderId) {
                 payment: true,
             },
         });
+    }, {
+        maxWait: 10_000,
+        timeout: 20_000,
     });
 }
 export async function getOrderById(userId, orderId) {
@@ -218,38 +220,56 @@ export async function getAllOrdersAdmin() {
 export async function updateOrderStatus(orderId, updateData) {
     const { orderStatus, paymentStatus } = updateData;
     if (orderStatus === undefined && paymentStatus === undefined) {
-        throw new AppError(400, "Request could not be empty");
+        throw new AppError(400, "At least one status must be provided");
     }
-    const existingOrder = await prisma.order.findUnique({
-        where: { id: orderId },
+    // Keep order and payment changes in the same transaction.
+    return prisma.$transaction(async (tx) => {
+        const existingOrder = await tx.order.findUnique({
+            where: { id: orderId },
+            include: { payment: true },
+        });
+        if (!existingOrder) {
+            throw new AppError(404, "Order not found");
+        }
+        if (existingOrder.status === "CANCELLED") {
+            throw new AppError(400, "Cannot change the status of a cancelled order");
+        }
+        if (orderStatus === "CANCELLED") {
+            throw new AppError(400, "Use the cancellation flow to cancel an order");
+        }
+        if (paymentStatus !== undefined && !existingOrder.payment) {
+            throw new AppError(409, "Cannot update payment status because this order has no payment record");
+        }
+        // Update the order fields that were actually provided.
+        const updatedOrder = await tx.order.update({
+            where: { id: orderId },
+            data: {
+                ...(orderStatus !== undefined && {
+                    status: orderStatus,
+                }),
+                ...(paymentStatus !== undefined && {
+                    paymentStatus,
+                }),
+            },
+        });
+        // Update the related payment only when requested.
+        if (paymentStatus !== undefined) {
+            await tx.payment.update({
+                where: { orderId },
+                data: { status: paymentStatus },
+            });
+        }
+        // Return the complete updated order.
+        return tx.order.findUnique({
+            where: { id: updatedOrder.id },
+            include: {
+                items: true,
+                payment: true,
+            },
+        });
+    }, {
+        maxWait: 10_000,
+        timeout: 20_000,
     });
-    if (!existingOrder) {
-        throw new AppError(404, "Order Not Found");
-    }
-    const { status } = existingOrder;
-    if (status === "CANCELLED") {
-        throw new AppError(400, "Cannot change the status of a cancelled order");
-    }
-    const updatedOrder = await prisma.order.update({
-        where: { id: orderId },
-        data: {
-            ...(orderStatus !== undefined && {
-                status: orderStatus,
-            }),
-            ...(paymentStatus !== undefined && {
-                paymentStatus: paymentStatus,
-                payment: {
-                    update: {
-                        status: paymentStatus,
-                    },
-                },
-            }),
-        },
-        include: {
-            items: true,
-            payment: true,
-        },
-    });
-    return updatedOrder;
 }
 //# sourceMappingURL=order.service.js.map
