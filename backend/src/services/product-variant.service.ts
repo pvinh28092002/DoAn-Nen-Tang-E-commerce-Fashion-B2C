@@ -8,6 +8,7 @@ type CreateProductVariantData = {
   sku: string;
   size?: string;
   color?: string;
+  images?: string[];
 };
 
 type UpdateProductVariantData = {
@@ -17,6 +18,7 @@ type UpdateProductVariantData = {
   sku?: string;
   size?: string;
   color?: string;
+  images?: string[];
 };
 
 //Read

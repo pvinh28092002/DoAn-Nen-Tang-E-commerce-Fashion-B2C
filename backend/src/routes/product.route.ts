@@ -1,4 +1,4 @@
-// src/routes/product.route.ts
+// src/routes/products.route.ts
 import { Router } from "express";
 import {
   handleGetProducts,

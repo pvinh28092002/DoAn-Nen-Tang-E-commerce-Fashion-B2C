@@ -10,7 +10,7 @@ import {
 import { authenticate } from "../middlewares/auth.middleware.js";
 const router = Router();
 
-router.get("/", authenticate, handleGetCart);
+router.get("/", handleGetCart);
 
 router.post("/items", authenticate, handleCreateCartItem);
 

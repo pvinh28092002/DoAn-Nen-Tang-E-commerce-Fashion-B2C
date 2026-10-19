@@ -7,6 +7,7 @@ export const createProductVariantSchema = z.object({
   sku: z.string().trim().min(1),
   size: z.string().trim().optional(),
   color: z.string().trim().optional(),
+  images: z.array(z.string().url()).optional(),
 });
 
 export const updateProductVariantSchema = z.object({
@@ -15,4 +16,5 @@ export const updateProductVariantSchema = z.object({
   sku: z.string().trim().min(1).optional(),
   size: z.string().trim().optional(),
   color: z.string().trim().optional(),
+  images: z.array(z.string().url()).optional(),
 });
