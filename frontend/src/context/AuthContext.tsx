@@ -4,7 +4,6 @@ import type { UserProfile } from "../features/auth/types";
 
 import type { ReactNode } from "react";
 
-// 1. Define what the data inside the elevator looks like
 interface AuthContextType {
   user: UserProfile | null;
   isAuthenticated: boolean;
@@ -13,13 +12,11 @@ interface AuthContextType {
   refreshUser: () => Promise<void>;
 }
 
-// 2. Build the elevator (We give it an initial value of undefined)
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// 3. Build the Provider component
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState<boolean>(true); // Keeps track of the initial API fetch
+  const [loading, setLoading] = useState<boolean>(true);
 
   // Function to fetch or refresh the current user profile from the backend
   const refreshUser = async () => {
@@ -38,7 +35,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refreshUser();
   }, []);
 
-  // Handle logging out
   const logout = async () => {
     try {
       await logOutUser();
@@ -62,7 +58,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         refreshUser,
       }}
     >
-      {/* ✋ Don't render the app until we finish the initial security check */}
       {!loading && children}
     </AuthContext.Provider>
   );

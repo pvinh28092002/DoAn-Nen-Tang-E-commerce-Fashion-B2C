@@ -5,11 +5,13 @@ export async function getProducts() {
         orderBy: {
             name: "asc",
         },
+        include: { variants: true },
     });
 }
 export async function getProductById(id) {
     const product = await prisma.product.findUnique({
         where: { id },
+        include: { variants: true },
     });
     if (!product) {
         throw new AppError(404, "Product not found");

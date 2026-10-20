@@ -1,5 +1,5 @@
 import { Link, Outlet } from "react-router";
-
+import { useAuth } from "../context/AuthContext";
 const navigation = [
   { label: "Home", to: "/" },
   { label: "Shop", to: "/products" },
@@ -7,6 +7,8 @@ const navigation = [
 ];
 
 export default function StoreLayout() {
+  const { isAuthenticated, logout } = useAuth();
+
   return (
     <div className="min-h-screen bg-white text-[#20201e]">
       <div className="bg-[#20201e] px-4 py-2 text-center text-xs tracking-wide text-white">
@@ -36,19 +38,32 @@ export default function StoreLayout() {
           </nav>
 
           <div className="flex items-center gap-5 text-sm font-medium">
-            <Link
-              to="/login"
-              className="hidden transition hover:text-neutral-500 sm:block"
-            >
-              Account
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <div
+                  onClick={logout}
+                  className="hidden transition hover:text-neutral-500 sm:block cursor-pointer"
+                >
+                  Logout
+                </div>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="hidden transition hover:text-neutral-500 sm:block"
+                >
+                  Account
+                </Link>
+              </>
+            )}
 
             <Link
               to="/cart"
               className="transition hover:text-neutral-500"
               aria-label="Shopping cart"
             >
-              Bag
+              Cart
             </Link>
           </div>
         </div>
