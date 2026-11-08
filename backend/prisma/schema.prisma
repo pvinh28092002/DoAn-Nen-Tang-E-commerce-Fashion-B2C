@@ -32,7 +32,7 @@ model Address {
   address    String
   city       String
   district   String
-  ward       String?
+  ward       String
   isDefault  Boolean  @default(false)
 
   createdAt  DateTime @default(now())

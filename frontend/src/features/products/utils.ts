@@ -8,6 +8,10 @@ export function getProductThumbnail(product: Product): string | null {
   );
 }
 
+export function getProductImages(product: Product): string[] {
+  return product.variants.flatMap((variant) => variant.images);
+}
+
 export function getProductPrice(product: Product): number | null {
   const prices = product.variants
     .filter((variant) => variant.stockQuantity > 0)

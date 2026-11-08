@@ -2,7 +2,33 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { getProductById } from "../features/products/api";
 import type { Product } from "../features/products/types";
+import PdpDetail from "../features/products/components/PdpDescription.tsx";
 import { formatPrice } from "../lib/format-price";
+import { getProductImages } from "../features/products/utils";
+//  interface ProductVariant {
+//   id: string;
+//   productId: string;
+//   size: string | null;
+//   color: string | null;
+//   price: string;
+//   sku: string;
+//   stockQuantity: number;
+//   images: string[];
+//   createdAt: string;
+//   updatedAt: string;
+// }
+
+//  interface Product {
+//   id: string;
+//   categoryId: string;
+//   name: string;
+//   slug: string;
+//   description: string | null;
+//   status: ProductStatus;
+//   createdAt: string;
+//   updatedAt: string;
+//   variants: ProductVariant[];
+// }
 
 export default function ProductDetailPage() {
   const { productId } = useParams<{ productId: string }>();
@@ -43,28 +69,31 @@ export default function ProductDetailPage() {
     };
   }, [productId]);
 
+  const productImages = product?.variants.flatMap((variant) => variant.images);
+
   if (isLoading) return <p className="text-neutral-500">Loading...</p>;
   if (error) return <p className="text-red-600">{error}</p>;
   if (!product) return <p>Product not found.</p>;
 
   return (
-    <div>
-      <h1 className="text-2xl font-medium tracking-tight">{product.name}</h1>
-      <p className="mt-2 text-neutral-500">{product.description}</p>
-
-      <ul className="mt-6 space-y-2">
-        {product.variants.map((v) => (
-          <li key={v.id} className="flex justify-between border p-3">
-            <span>
-              {v.color} / {v.size}
-            </span>
-            <span>
-              {formatPrice(v.price)}
-              {v.stockQuantity === 0 && " (out of stock)"}
-            </span>
-          </li>
+    <div className="grid gap-12 lg:grid-cols-2 mx-32">
+      {/* LEFT: images */}
+      <div className="space-y-4">
+        {productImages?.map((imageUrl, index) => (
+          <div key={index} className="aspect-[3/4]  overflow-hidden ">
+            <img
+              src={imageUrl + `?tr=w-900,q-80,f-auto`}
+              alt={`Product image ${index + 1}`}
+              className="w-full h-auto object-cover"
+            />
+          </div>
         ))}
-      </ul>
+      </div>
+
+      {/* RIGHT: product info */}
+      <div className="lg:sticky lg:top-24 lg:self-start">
+        <PdpDetail product={product} />
+      </div>
     </div>
   );
 }

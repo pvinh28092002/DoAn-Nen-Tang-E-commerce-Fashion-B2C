@@ -1,3 +1,4 @@
+//src/context/AuthContext.tsx
 import { createContext, useContext, useState, useEffect } from "react";
 import { getCurrentUser, logOutUser } from "../features/auth/api";
 import type { UserProfile } from "../features/auth/types";
@@ -58,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         refreshUser,
       }}
     >
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 }

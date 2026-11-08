@@ -1,4 +1,4 @@
-// src/features/auth/components/LoginForm.tsx
+// src/features/auth/components/RegisterForm.tsx
 import { useState, type ChangeEvent, type SubmitEvent } from "react";
 import { useNavigate } from "react-router";
 import { registerUser } from "../api";
@@ -49,16 +49,18 @@ export default function RegisterForm() {
   return (
     <form className="space-y-4" onSubmit={handleFormSubmit}>
       <div>
-        <label htmlFor="username" className="block text-sm font-medium">
+        <label htmlFor="name" className="block text-sm font-medium">
           Username
         </label>
         <input
           id="name"
           name="name"
-          type="name"
+          type="text"
           value={formData.name}
           onChange={handleFormChange}
           className="mt-1 w-full border border-neutral-300 px-3 py-2 text-sm"
+          required
+          autoComplete="name"
         />
       </div>
       <div>
@@ -72,6 +74,7 @@ export default function RegisterForm() {
           value={formData.email}
           onChange={handleFormChange}
           className="mt-1 w-full border border-neutral-300 px-3 py-2 text-sm"
+          required
         />
       </div>
 
@@ -86,6 +89,7 @@ export default function RegisterForm() {
           value={formData.password}
           onChange={handleFormChange}
           className="mt-1 w-full border border-neutral-300 px-3 py-2 text-sm"
+          required
         />
       </div>
 

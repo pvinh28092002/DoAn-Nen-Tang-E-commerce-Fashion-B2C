@@ -125,7 +125,7 @@ export async function handleGetUserAddresses(
     });
   } catch (error) {
     next(error);
-  }
+  } 
 }
 
 export async function handleCreateUserAddress(

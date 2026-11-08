@@ -5,7 +5,11 @@ export async function getCart(userId: string) {
   const cart = await prisma.cart.findUnique({
     where: { userId },
     include: {
-      items: true,
+      items: {
+        include: {
+          variant: true,
+        },
+      },
     },
   });
   if (!cart) {

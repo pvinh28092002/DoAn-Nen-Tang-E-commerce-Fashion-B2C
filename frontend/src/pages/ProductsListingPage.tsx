@@ -3,7 +3,7 @@ import { getProducts } from "../features/products/api";
 import type { Product } from "../features/products/types";
 import ProductCard from "../features/products/components/ProductCard";
 
-export default function ProductsPage() {
+export default function ProductsListingPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

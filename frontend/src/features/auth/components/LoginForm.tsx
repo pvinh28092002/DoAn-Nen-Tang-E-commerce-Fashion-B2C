@@ -51,6 +51,7 @@ export default function LoginForm() {
           value={formData.email}
           onChange={handleFormChange}
           className="mt-1 w-full border border-neutral-300 px-3 py-2 text-sm"
+          required
         />
       </div>
 
@@ -65,6 +66,7 @@ export default function LoginForm() {
           value={formData.password}
           onChange={handleFormChange}
           className="mt-1 w-full border border-neutral-300 px-3 py-2 text-sm"
+          required
         />
       </div>
 

@@ -1,3 +1,4 @@
+//src/layouts/StoreLayout.tsx
 import { Link, Outlet } from "react-router";
 import { useAuth } from "../context/AuthContext";
 const navigation = [
@@ -11,10 +12,6 @@ export default function StoreLayout() {
 
   return (
     <div className="min-h-screen bg-white text-[#20201e]">
-      <div className="bg-[#20201e] px-4 py-2 text-center text-xs tracking-wide text-white">
-        FREE SHIPPING ON ORDERS OVER 1,000,000 VND
-      </div>
-
       <header className="sticky top-0 z-20 border-b border-neutral-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 md:px-8">
           <Link
@@ -39,14 +36,13 @@ export default function StoreLayout() {
 
           <div className="flex items-center gap-5 text-sm font-medium">
             {isAuthenticated ? (
-              <>
-                <div
-                  onClick={logout}
-                  className="hidden transition hover:text-neutral-500 sm:block cursor-pointer"
-                >
-                  Logout
-                </div>
-              </>
+              <button
+                type="button"
+                onClick={() => void logout()}
+                className="hidden transition hover:text-neutral-500 sm:block"
+              >
+                Logout
+              </button>
             ) : (
               <>
                 <Link
@@ -84,7 +80,7 @@ export default function StoreLayout() {
         </nav>
       </header>
 
-      <main>
+      <main className="min-h-[68vh]">
         <Outlet />
       </main>
 
