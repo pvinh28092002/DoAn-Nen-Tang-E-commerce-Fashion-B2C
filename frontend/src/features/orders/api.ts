@@ -13,3 +13,13 @@ export async function checkout(data: CheckoutRequest): Promise<Order> {
 
   return response.data;
 }
+
+export async function getOrderById(id: string): Promise<Order> {
+  const response = await apiRequest<ApiResponse<Order>>(`/orders/${id}`);
+
+  if (!response.success) {
+    throw new Error("Failed to fetch order");
+  }
+
+  return response.data;
+}

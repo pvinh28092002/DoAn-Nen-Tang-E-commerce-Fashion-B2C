@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 
 import { getCurrentCart } from "../features/carts/api";
 import type { CartItem } from "../features/carts/types";
@@ -12,6 +12,36 @@ import type { CheckoutRequest } from "../features/orders/types";
 
 import CheckoutForm from "../features/orders/components/CheckoutForm";
 import OrderSummary from "../features/orders/components/OrderSummary";
+
+function CheckoutSkeleton() {
+  return (
+    <div className="grid animate-pulse gap-10 lg:grid-cols-3">
+      <div className="space-y-8 lg:col-span-2">
+        <section className="space-y-5">
+          <div className="h-6 w-48 bg-neutral-200" />
+          <div className="h-12 w-full bg-neutral-200" />
+          <div className="h-12 w-full bg-neutral-200" />
+          <div className="h-12 w-full bg-neutral-200" />
+          <div className="h-12 w-full bg-neutral-200" />
+        </section>
+
+        <section className="space-y-5">
+          <div className="h-6 w-40 bg-neutral-200" />
+          <div className="h-16 w-full bg-neutral-200" />
+          <div className="h-16 w-full bg-neutral-200" />
+        </section>
+      </div>
+
+      <div className="h-80 space-y-5 border p-6">
+        <div className="h-6 w-1/2 bg-neutral-200" />
+        <div className="h-16 w-full bg-neutral-200" />
+        <div className="h-4 w-full bg-neutral-200" />
+        <div className="h-4 w-full bg-neutral-200" />
+        <div className="h-12 w-full bg-neutral-200" />
+      </div>
+    </div>
+  );
+}
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
@@ -81,48 +111,70 @@ export default function CheckoutPage() {
     }
   }
 
-  if (isLoading) {
-    return <p className="p-8 text-neutral-500">Loading checkout...</p>;
-  }
-
-  if (error && cartItems.length === 0) {
-    return <p className="p-8 text-red-600">{error}</p>;
-  }
-
-  if (cartItems.length === 0) {
-    return (
-      <div className="px-6 py-20 text-center">
-        <h1 className="text-xl font-semibold">Your cart is empty</h1>
-        <p className="mt-2 text-neutral-500">
-          Add some products before proceeding to checkout.
-        </p>
-        <button
-          onClick={() => navigate("/products")}
-          className="mt-6 bg-black px-6 py-3 text-white"
-        >
-          Continue Shopping
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <main className="mx-4 py-10 md:mx-8 lg:mx-16 xl:mx-32">
-      <h1 className="mb-8 text-2xl font-semibold">Checkout</h1>
+    <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mb-10">
+        <Link
+          to="/cart"
+          className="mb-5 inline-block text-sm text-neutral-500 hover:text-black"
+        >
+          ← Back to cart
+        </Link>
 
-      {error && <p className="mb-6 text-sm text-red-600">{error}</p>}
-
-      <div className="grid gap-10 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <CheckoutForm
-            addresses={addresses}
-            onSubmit={handleCheckout}
-            isSubmitting={isSubmitting}
-          />
-        </div>
-
-        <OrderSummary items={cartItems} />
+        <h1 className="text-3xl font-semibold tracking-tight">Checkout</h1>
+        <p className="mt-2 text-sm text-neutral-500">
+          Complete your delivery and payment information.
+        </p>
       </div>
+
+      {isLoading ? (
+        <CheckoutSkeleton />
+      ) : error && cartItems.length === 0 ? (
+        <div className="py-16 text-center">
+          <p className="text-red-600">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-5 border border-black px-6 py-3 text-sm"
+          >
+            Try again
+          </button>
+        </div>
+      ) : cartItems.length === 0 ? (
+        <div className="py-20 text-center">
+          <h2 className="text-xl font-semibold">Your cart is empty</h2>
+          <p className="mt-3 text-sm text-neutral-500">
+            Add some products before proceeding to checkout.
+          </p>
+          <Link
+            to="/products"
+            className="mt-7 inline-block bg-black px-8 py-3 text-sm text-white hover:bg-neutral-800"
+          >
+            Continue shopping
+          </Link>
+        </div>
+      ) : (
+        <>
+          {error && (
+            <div className="mb-6 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
+          <div className="grid gap-10 lg:grid-cols-3">
+            <section className="lg:col-span-2">
+              <CheckoutForm
+                addresses={addresses}
+                onSubmit={handleCheckout}
+                isSubmitting={isSubmitting}
+              />
+            </section>
+
+            <aside className="h-fit lg:sticky lg:top-24">
+              <OrderSummary items={cartItems} />
+            </aside>
+          </div>
+        </>
+      )}
     </main>
   );
 }

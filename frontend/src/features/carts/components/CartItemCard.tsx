@@ -137,7 +137,7 @@ export default function CartItemCard({
             <button
               type="button"
               className="text-sm text-neutral-500 underline hover:text-neutral-900"
-              onClick={() => handleRemoveItem}
+              onClick={handleRemoveItem}
               disabled={isSubmitting}
             >
               Remove

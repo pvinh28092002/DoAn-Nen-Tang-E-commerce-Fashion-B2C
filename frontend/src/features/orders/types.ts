@@ -55,7 +55,7 @@ export interface Order {
   address: string;
   city: string;
   district: string;
-  ward?: string | null;
+  ward: string;
   items: OrderItem[];
   payment: {
     method: PaymentMethod;
