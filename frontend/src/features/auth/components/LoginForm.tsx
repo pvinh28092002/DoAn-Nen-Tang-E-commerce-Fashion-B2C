@@ -6,7 +6,7 @@ import { useAuth } from "../../../context/AuthContext";
 
 export default function LoginForm() {
   const navigate = useNavigate();
-  const { refreshUser } = useAuth();
+  const { refreshUser, user } = useAuth();
 
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +30,11 @@ export default function LoginForm() {
       setError(null);
       await loginUser(formData);
       await refreshUser();
-      navigate("/");
+      if (user?.role === "ADMIN") {
+        navigate("/admin/");
+      } else {
+        navigate("/");
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Could not log in.");
     } finally {

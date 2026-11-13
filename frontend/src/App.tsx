@@ -1,5 +1,9 @@
-import { Route, Routes } from "react-router";
+// App.tsx
+import { Navigate, Route, Routes } from "react-router";
+
 import StoreLayout from "./layouts/StoreLayout";
+import AdminLayout from "./layouts/AdminLayout";
+
 import HomePage from "./pages/HomePage";
 import NotFoundPage from "./pages/NotFoundPage";
 import ProductsListingPage from "./pages/ProductsListingPage";
@@ -9,20 +13,23 @@ import RegisterPage from "./pages/RegisterPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import OrderSuccessPage from "./pages/OrderSuccessPage";
-import ProtectedRoute from "./components/ProtectedRoute";
+import DashboardPage from "./pages/admin/DashboardPage";
+import CategoriesPage from "./pages/admin/CategoriesPage";
+import ProtectedRoute, {
+  AdminProtectedRoute,
+} from "./components/ProtectedRoute";
 
 export default function App() {
   return (
     <Routes>
+      {/* Store */}
       <Route element={<StoreLayout />}>
-        {/* Public Routes */}
         <Route index element={<HomePage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
         <Route path="products" element={<ProductsListingPage />} />
         <Route path="products/:productId" element={<ProductDetailPage />} />
 
-        {/* 2. Protected Routes Wrapper */}
         <Route element={<ProtectedRoute />}>
           <Route path="cart" element={<CartPage />} />
           <Route path="checkout" element={<CheckoutPage />} />
@@ -31,9 +38,19 @@ export default function App() {
             element={<OrderSuccessPage />}
           />
         </Route>
-        {/* Catch-all Route */}
-        <Route path="*" element={<NotFoundPage />} />
       </Route>
+
+      {/* Admin */}
+      <Route element={<AdminProtectedRoute />}>
+        <Route path="admin" element={<AdminLayout />}>
+          <Route index element={<DashboardPage />} />
+          <Route path="categories" element={<CategoriesPage />} />
+          <Route path="products" element={<>Products pending</>} />
+          <Route path="orders" element={<>Orders pending</>} />
+        </Route>
+      </Route>
+
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }

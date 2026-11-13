@@ -8,11 +8,15 @@ import {
   handleGetCategoryById,
   handleDeleteCategory,
 } from "../controllers/category.controller.js";
+import { requireRole } from "../middlewares/role.middleware.js";
 
 const router = Router();
 router.get("/", handleGetCategories);
 router.get("/tree", handleGetCategoryTree);
 router.get("/:id", handleGetCategoryById);
+
+router.use(requireRole("ADMIN"));
+
 router.post("/", handleCreateCategory);
 router.put("/:id", handleUpdateCategory);
 router.delete("/:id", handleDeleteCategory);

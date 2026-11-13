@@ -1,3 +1,4 @@
+//src/components/ProtectedRoute.tsx
 import { Navigate, useLocation, Outlet } from "react-router";
 import { useAuth } from "../context/AuthContext";
 
@@ -18,5 +19,27 @@ export default function ProtectedRoute() {
   }
 
   // If authenticated, render the matched child route
+  return <Outlet />;
+}
+
+export function AdminProtectedRoute() {
+  const { isAuthenticated, loading, user } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+  // If authenticated, render the matched child route
+  if (user?.role !== "ADMIN") {
+    return <Navigate to="/" replace />;
+  }
   return <Outlet />;
 }
