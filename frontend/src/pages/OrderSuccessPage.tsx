@@ -132,9 +132,11 @@ export default function OrderSuccessPage() {
             <div className="flex justify-between gap-4">
               <span className="text-neutral-500">Payment method</span>
               <span className="font-medium">
-                {order.payment.method === "COD"
+                {order.payment?.method === "COD"
                   ? "Cash on delivery"
-                  : "Bank transfer"}
+                  : order.payment?.method === "BANK_TRANSFER"
+                    ? "Bank transfer"
+                    : "Payment details unavailable"}
               </span>
             </div>
 

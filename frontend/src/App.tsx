@@ -1,5 +1,5 @@
 // App.tsx
-import { Navigate, Route, Routes } from "react-router";
+import { Route, Routes } from "react-router";
 
 import StoreLayout from "./layouts/StoreLayout";
 import AdminLayout from "./layouts/AdminLayout";
@@ -19,6 +19,7 @@ import ProtectedRoute, {
   AdminProtectedRoute,
 } from "./components/ProtectedRoute";
 import ProductsPage from "./pages/admin/ProductsPage";
+import OrdersPage from "./pages/admin/OrdersPage";
 
 export default function App() {
   return (
@@ -47,7 +48,7 @@ export default function App() {
           <Route index element={<DashboardPage />} />
           <Route path="categories" element={<CategoriesPage />} />
           <Route path="products" element={<ProductsPage />} />
-          <Route path="orders" element={<>Orders pending</>} />
+          <Route path="orders" element={<OrdersPage />} />
         </Route>
       </Route>
 

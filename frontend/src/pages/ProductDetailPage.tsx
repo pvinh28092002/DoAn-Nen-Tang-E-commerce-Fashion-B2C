@@ -3,8 +3,6 @@ import { useParams } from "react-router";
 import { getProductById } from "../features/products/api";
 import type { Product } from "../features/products/types";
 import PdpDetail from "../features/products/components/PdpDescription.tsx";
-import { formatPrice } from "../lib/format-price";
-import { getProductImages } from "../features/products/utils";
 //  interface ProductVariant {
 //   id: string;
 //   productId: string;

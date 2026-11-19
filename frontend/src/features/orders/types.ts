@@ -65,12 +65,12 @@ export interface Order {
   address: string;
   city: string;
   district: string;
-  ward: string;
+  ward: string | null;
   items: OrderItem[];
   payment: {
     method: PaymentMethod;
-    status: string;
-  };
+    status: PaymentStatus;
+  } | null;
   createdAt: string;
 }
 
