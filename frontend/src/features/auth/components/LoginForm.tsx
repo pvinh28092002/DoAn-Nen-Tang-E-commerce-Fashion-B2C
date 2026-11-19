@@ -1,12 +1,13 @@
 // src/features/auth/components/LoginForm.tsx
 import { useState, type ChangeEvent, type SubmitEvent } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { loginUser } from "../api";
 import { useAuth } from "../../../context/AuthContext";
 
 export default function LoginForm() {
   const navigate = useNavigate();
-  const { refreshUser, user } = useAuth();
+  const { refreshUser } = useAuth();
+  const location = useLocation();
 
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
@@ -29,19 +30,24 @@ export default function LoginForm() {
       setIsSubmitting(true);
       setError(null);
       await loginUser(formData);
-      await refreshUser();
-      if (user?.role === "ADMIN") {
-        navigate("/admin/");
-      } else {
-        navigate("/");
+      const loggedInUser = await refreshUser();
+      if (!loggedInUser) {
+        throw new Error("Could not load your account after logging in.");
       }
+
+      const requestedPath = (location.state as { from?: { pathname?: string } } | null)
+        ?.from?.pathname;
+      const isAdminPath = requestedPath?.startsWith("/admin");
+      const destination = requestedPath && (!isAdminPath || loggedInUser.role === "ADMIN")
+        ? requestedPath
+        : loggedInUser.role === "ADMIN" ? "/admin/" : "/";
+      navigate(destination, { replace: true });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Could not log in.");
     } finally {
       setIsSubmitting(false);
     }
   }
-
   return (
     <form className="space-y-4" onSubmit={handleFormSubmit}>
       <div>

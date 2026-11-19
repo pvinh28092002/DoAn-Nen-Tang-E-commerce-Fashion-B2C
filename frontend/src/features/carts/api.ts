@@ -4,6 +4,7 @@ import type {
   CartItem,
   AddCartItem,
   UpdateCartItem,
+  ClearCartResult,
 } from "./types";
 
 export async function getCurrentCart() {
@@ -49,5 +50,14 @@ export async function deleteCartItem(data: string) {
   if (!response.success) {
     throw new Error("Failed to remove cart item");
   }
+  return response.data;
+}
+
+export async function clearCart(): Promise<ClearCartResult> {
+  const response = await apiRequest<ApiResponse<ClearCartResult>>(
+    "/carts/items",
+    { method: "DELETE" },
+  );
+  if (!response.success) throw new Error("Failed to clear cart");
   return response.data;
 }

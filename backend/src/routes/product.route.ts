@@ -9,6 +9,7 @@ import {
   handleGetVariantsByProductId,
 } from "../controllers/product.controller.js";
 import { requireRole } from "../middlewares/role.middleware.js";
+import { authenticate } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
@@ -16,6 +17,7 @@ router.get("/", handleGetProducts);
 router.get("/:id/variants", handleGetVariantsByProductId);
 router.get("/:id", handleGetProductById);
 
+router.use(authenticate);
 router.use(requireRole("ADMIN"));
 router.post("/", handleCreateProduct);
 router.put("/:id", handleUpdateProduct);

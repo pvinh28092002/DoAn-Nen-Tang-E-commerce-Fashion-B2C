@@ -9,6 +9,10 @@ export interface Category {
   updatedAt: string;
 }
 
+export interface CategoryTreeNode extends Category {
+  children: Category[];
+}
+
 export interface CategoryInput {
   name: string;
   slug: string;

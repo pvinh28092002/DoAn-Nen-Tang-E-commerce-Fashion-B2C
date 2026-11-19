@@ -25,3 +25,7 @@ export interface UpdateCartItem{
   quantity: number;
 
 }
+
+export interface ClearCartResult {
+  count: number;
+}

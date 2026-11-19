@@ -1,6 +1,16 @@
-import type { CartItem } from "../carts/types";
-
 export type PaymentMethod = "COD" | "BANK_TRANSFER";
+export type OrderStatus =
+  | "PENDING"
+  | "PROCESSING"
+  | "SHIPPED"
+  | "DELIVERED"
+  | "CANCELLED";
+export type PaymentStatus = "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED";
+
+export interface UpdateOrderStatusInput {
+  orderStatus?: Exclude<OrderStatus, "CANCELLED">;
+  paymentStatus?: PaymentStatus;
+}
 
 export interface DeliveryAddress {
   recipient: string;
@@ -47,8 +57,8 @@ export interface OrderItem {
 
 export interface Order {
   id: string;
-  status: string;
-  paymentStatus: string;
+  status: OrderStatus;
+  paymentStatus: PaymentStatus;
   totalAmount: string;
   recipient: string;
   phone: string;

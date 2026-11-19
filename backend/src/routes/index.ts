@@ -6,6 +6,8 @@ import cartRouter from "./cart.route.js";
 import userRouter from "./user.route.js";
 import authRouter from "./auth.route.js";
 import orderRouter from "./order.route.js";
+import uploadRouter from "./upload.route.js";
+
 const apiRouter = Router();
 
 // Hook up individual domain routes here
@@ -16,5 +18,6 @@ apiRouter.use("/carts", cartRouter);
 apiRouter.use("/users", userRouter);
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/orders", orderRouter);
+apiRouter.use("/uploads", uploadRouter);
 
 export default apiRouter;

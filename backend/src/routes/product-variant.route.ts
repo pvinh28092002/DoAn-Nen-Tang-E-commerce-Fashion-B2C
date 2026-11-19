@@ -8,10 +8,12 @@ import {
   handleDeleteVariant,
 } from "../controllers/product-variant.controller.js";
 import { requireRole } from "../middlewares/role.middleware.js";
+import { authenticate } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 router.get("/sku/:sku", handleGetVariantsBySku);
 router.get("/:id", handleGetVariantById);
+router.use(authenticate);
 
 router.use(requireRole("ADMIN"));
 

@@ -1,5 +1,17 @@
 import { apiRequest } from "../../lib/api-client";
-import type { ApiResponse, Category, CategoryInput } from "./types";
+import type {
+  ApiResponse,
+  Category,
+  CategoryInput,
+  CategoryTreeNode,
+} from "./types";
+
+export async function getCategoryTree(): Promise<CategoryTreeNode[]> {
+  const response = await apiRequest<ApiResponse<CategoryTreeNode[]>>(
+    "/categories/tree",
+  );
+  return response.data;
+}
 
 export async function getCategories(): Promise<Category[]> {
   const response = await apiRequest<ApiResponse<Category[]>>("/categories");

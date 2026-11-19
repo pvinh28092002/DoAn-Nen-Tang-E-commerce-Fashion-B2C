@@ -1,5 +1,10 @@
 import { apiRequest } from "../../lib/api-client";
-import type { ApiResponse, CheckoutRequest, Order } from "./types";
+import type {
+  ApiResponse,
+  CheckoutRequest,
+  Order,
+  UpdateOrderStatusInput,
+} from "./types";
 
 export async function checkout(data: CheckoutRequest): Promise<Order> {
   const response = await apiRequest<ApiResponse<Order>>("/orders/checkout", {
@@ -21,5 +26,38 @@ export async function getOrderById(id: string): Promise<Order> {
     throw new Error("Failed to fetch order");
   }
 
+  return response.data;
+}
+
+export async function getOrders(): Promise<Order[]> {
+  const response = await apiRequest<ApiResponse<Order[]>>("/orders");
+  if (!response.success) throw new Error("Failed to fetch orders");
+  return response.data;
+}
+
+export async function cancelOrder(id: string): Promise<Order> {
+  const response = await apiRequest<ApiResponse<Order>>(
+    `/orders/${encodeURIComponent(id)}/cancel`,
+    { method: "POST" },
+  );
+  if (!response.success) throw new Error("Failed to cancel order");
+  return response.data;
+}
+
+export async function getAllOrdersAdmin(): Promise<Order[]> {
+  const response = await apiRequest<ApiResponse<Order[]>>("/orders/admin/all");
+  if (!response.success) throw new Error("Failed to fetch all orders");
+  return response.data;
+}
+
+export async function updateOrderStatusAdmin(
+  id: string,
+  input: UpdateOrderStatusInput,
+): Promise<Order> {
+  const response = await apiRequest<ApiResponse<Order>>(
+    `/orders/admin/${encodeURIComponent(id)}/status`,
+    { method: "PATCH", body: input },
+  );
+  if (!response.success) throw new Error("Failed to update order status");
   return response.data;
 }

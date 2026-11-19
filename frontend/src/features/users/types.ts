@@ -21,6 +21,21 @@ export interface CreateAddressInput {
   isDefault?: boolean;
 }
 
+export type UpdateAddressInput = Partial<CreateAddressInput>;
+
+export type UserRole = "CUSTOMER" | "ADMIN";
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type UpdateUserInput = Partial<Pick<AdminUser, "name" | "email" | "role">>;
+
 export interface ApiResponse<T> {
   success: boolean;
   data: T;

@@ -10,7 +10,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   loading: boolean;
   logout: () => Promise<void>;
-  refreshUser: () => Promise<void>;
+  refreshUser: () => Promise<UserProfile | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,12 +20,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState<boolean>(true);
 
   // Function to fetch or refresh the current user profile from the backend
-  const refreshUser = async () => {
+  const refreshUser = async (): Promise<UserProfile | null> => {
     try {
       const userData = await getCurrentUser();
       setUser(userData);
+      return userData;
     } catch (error) {
       setUser(null); // If API fails (e.g., expired token), make sure user is logged out
+      return null;
     } finally {
       setLoading(false);
     }

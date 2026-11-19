@@ -25,6 +25,40 @@ export interface Product {
   variants: ProductVariant[];
 }
 
+/** Payload accepted by POST /products. */
+export interface CreateProductInput {
+  categoryId: string;
+  name: string;
+  slug: string;
+  description?: string;
+  status?: ProductStatus;
+}
+
+/** Payload accepted by PUT /products/:id. */
+export type UpdateProductInput = Partial<CreateProductInput>;
+
+/** API accepts `stock`; responses expose the database field `stockQuantity`. */
+export interface CreateProductVariantInput {
+  productId: string;
+  price: number;
+  stock: number;
+  sku: string;
+  size?: string;
+  color?: string;
+  images?: string[];
+}
+
+/** Payload accepted by PUT /product-variants/:id. */
+export type UpdateProductVariantInput = Partial<
+  Omit<CreateProductVariantInput, "productId">
+>;
+
+export interface DeleteProductResponse<T> {
+  success: boolean;
+  message: string;
+  deletedProduct: T;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   data: T;

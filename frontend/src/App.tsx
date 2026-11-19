@@ -18,6 +18,7 @@ import CategoriesPage from "./pages/admin/CategoriesPage";
 import ProtectedRoute, {
   AdminProtectedRoute,
 } from "./components/ProtectedRoute";
+import ProductsPage from "./pages/admin/ProductsPage";
 
 export default function App() {
   return (
@@ -45,7 +46,7 @@ export default function App() {
         <Route path="admin" element={<AdminLayout />}>
           <Route index element={<DashboardPage />} />
           <Route path="categories" element={<CategoriesPage />} />
-          <Route path="products" element={<>Products pending</>} />
+          <Route path="products" element={<ProductsPage />} />
           <Route path="orders" element={<>Orders pending</>} />
         </Route>
       </Route>
