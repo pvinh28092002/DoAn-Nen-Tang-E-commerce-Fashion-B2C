@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getProducts } from "../features/products/api";
+import { getActiveProducts } from "../features/products/api";
 import type { Product } from "../features/products/types";
 import ProductCard from "../features/products/components/ProductCard";
 
@@ -16,7 +16,7 @@ export default function ProductsListingPage() {
         setIsLoading(true);
         setError(null);
 
-        const result = await getProducts();
+        const result = await getActiveProducts();
 
         if (isActive) {
           setProducts(result);

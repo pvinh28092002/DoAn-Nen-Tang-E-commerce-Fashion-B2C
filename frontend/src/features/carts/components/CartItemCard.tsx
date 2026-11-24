@@ -25,6 +25,9 @@ export default function CartItemCard({
   const unitPrice = Number(variant.price);
   const lineTotal = unitPrice * quantity;
   const reachesStockLimit = quantity >= variant.stockQuantity;
+  const isUnavailable =
+    !variant.isActive || variant.product?.status === "INACTIVE" || variant.product?.status === "ARCHIVED";
+  const exceedsAvailableStock = quantity > variant.stockQuantity;
 
   async function handleRemoveItem() {
     try {
@@ -86,7 +89,7 @@ export default function CartItemCard({
           <div>
             {/* Later: show the product name here once the backend sends it */}
             <h3 className="font-medium tracking-tight">
-              {variant.color} / {variant.size}
+              {variant.product?.name ?? "Product"} · {variant.color} / {variant.size}
             </h3>
             <p className="mt-1 text-xs text-neutral-500">SKU: {variant.sku}</p>
             <p className="mt-1 text-sm text-neutral-500">
@@ -104,7 +107,7 @@ export default function CartItemCard({
               <button
                 type="button"
                 aria-label="Decrease quantity"
-                disabled={quantity <= 1 || isSubmitting}
+                disabled={quantity <= 1 || isSubmitting || isUnavailable}
                 className="h-9 w-9 text-neutral-700 hover:bg-neutral-100 disabled:opacity-40"
                 onClick={() => {
                   handleUpdateItemQuantity(quantity - 1);
@@ -128,7 +131,7 @@ export default function CartItemCard({
                 onClick={() => {
                   handleUpdateItemQuantity(quantity + 1);
                 }}
-                disabled={reachesStockLimit || isSubmitting}
+                disabled={reachesStockLimit || isSubmitting || isUnavailable}
               >
                 +
               </button>
@@ -144,7 +147,18 @@ export default function CartItemCard({
             </button>
           </div>
 
-          {reachesStockLimit && (
+          {isUnavailable && (
+            <p className="mt-2 text-xs text-red-600">
+              This item is no longer available. Remove it to continue checkout.
+            </p>
+          )}
+
+          {!isUnavailable && exceedsAvailableStock && (
+            <p className="mt-2 text-xs text-red-600">
+              The available stock has changed. Reduce the quantity to continue.
+            </p>
+          )}
+          {!isUnavailable && !exceedsAvailableStock && reachesStockLimit && (
             <p className="mt-2 text-xs text-red-600">
               Maximum available quantity reached.
             </p>

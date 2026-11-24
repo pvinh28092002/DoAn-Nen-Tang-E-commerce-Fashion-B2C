@@ -1,5 +1,14 @@
 import { prisma } from "../config/prisma.js";
 import { AppError } from "../errors/app-error.js";
+export async function getActiveProducts() {
+    return prisma.product.findMany({
+        orderBy: {
+            name: "asc",
+        },
+        where: { status: "ACTIVE" },
+        include: { variants: { where: { isActive: true } } },
+    });
+}
 export async function getProducts() {
     return prisma.product.findMany({
         orderBy: {
@@ -18,13 +27,25 @@ export async function getProductById(id) {
     }
     return product;
 }
+export async function getActiveProductById(id) {
+    const product = await prisma.product.findFirst({
+        where: { id, status: "ACTIVE" },
+        include: { variants: { where: { isActive: true } } },
+    });
+    if (!product) {
+        throw new AppError(404, "Product not found");
+    }
+    return product;
+}
 export async function getVariantsByProductId(id) {
-    const existingProduct = await prisma.product.findUnique({ where: { id } });
+    const existingProduct = await prisma.product.findFirst({
+        where: { id, status: "ACTIVE" },
+    });
     if (!existingProduct) {
         throw new AppError(404, "Product not found");
     }
     return prisma.productVariant.findMany({
-        where: { productId: id },
+        where: { productId: id, isActive: true },
     });
 }
 //Create
@@ -91,13 +112,5 @@ export async function updateProduct(id, data) {
             }),
         },
     });
-}
-//Delete
-export async function deleteProduct(id) {
-    const existingProduct = await prisma.product.findUnique({ where: { id } });
-    if (!existingProduct) {
-        throw new AppError(404, "Product not found");
-    }
-    return prisma.product.delete({ where: { id } });
 }
 //# sourceMappingURL=product.service.js.map

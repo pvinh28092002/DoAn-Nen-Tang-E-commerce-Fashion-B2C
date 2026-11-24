@@ -1,35 +1,33 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import ProductTable from "../../features/products/components/ProductTable";
-import {
-  getProducts,
-  deleteProduct,
-} from "../../features/products/api";
+import { getAllProductsAdmin } from "../../features/products/api";
 import { getCategories } from "../../features/categories/api";
 import type { Product } from "../../features/products/types";
 import type { Category } from "../../features/categories/types";
 import ProductCreationModal from "../../features/products/components/ProductCreationModal";
 
 export default function ProductsPage() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+
   const fetchData = async () => {
     try {
       setLoading(true);
       setError(null);
-
       const [productData, categoryData] = await Promise.all([
-        getProducts(),
+        getAllProductsAdmin(),
         getCategories(),
       ]);
-
       setProducts(productData);
       setCategories(categoryData);
-    } catch (error) {
+    } catch (loadError: unknown) {
       setError(
-        error instanceof Error ? error.message : "Failed to load products",
+        loadError instanceof Error ? loadError.message : "Failed to load products.",
       );
     } finally {
       setLoading(false);
@@ -37,46 +35,40 @@ export default function ProductsPage() {
   };
 
   useEffect(() => {
-    void fetchData();
+    let active = true;
+    Promise.all([getAllProductsAdmin(), getCategories()])
+      .then(([productData, categoryData]) => {
+        if (active) {
+          setProducts(productData);
+          setCategories(categoryData);
+        }
+      })
+      .catch((loadError: unknown) => {
+        if (active) {
+          setError(
+            loadError instanceof Error ? loadError.message : "Failed to load products.",
+          );
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
-  const handleDelete = async (product: Product) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${product.name}"?`,
-    );
-
-    if (!confirmed) return;
-
-    try {
-      setError(null);
-      await deleteProduct(product.id);
-      await fetchData();
-    } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Failed to delete product",
-      );
-    }
-  };
-
-  const handleEdit = (product: Product) => {
-    // We'll implement the edit form next.
-    console.log("Edit product:", product);
-  };
-
-  if (loading) {
-    return <div className="p-6">Loading products...</div>;
-  }
+  if (loading) return <div className="p-6">Loading products...</div>;
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold">Products</h1>
           <p className="text-sm text-gray-500">
-            Manage your store products and variants.
+            Manage products, variants, availability, and stock.
           </p>
         </div>
-
         <button
           type="button"
           className="rounded-lg bg-black px-4 py-2 text-white hover:bg-gray-800"
@@ -87,7 +79,12 @@ export default function ProductsPage() {
       </div>
 
       {error && (
-        <p className="rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</p>
+        <div role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+          <p>{error}</p>
+          <button type="button" onClick={() => void fetchData()} className="mt-2 underline">
+            Try again
+          </button>
+        </div>
       )}
       {showForm && (
         <ProductCreationModal
@@ -101,8 +98,7 @@ export default function ProductsPage() {
       <ProductTable
         products={products}
         categories={categories}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
+        onEdit={(product) => navigate(`/admin/products/${product.id}`)}
       />
     </div>
   );

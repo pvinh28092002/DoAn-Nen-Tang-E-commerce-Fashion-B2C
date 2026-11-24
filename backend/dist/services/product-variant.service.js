@@ -89,14 +89,4 @@ export async function updateVariant(id, data) {
         },
     });
 }
-//Delete
-export async function deleteVariant(id) {
-    const existingVariant = await prisma.productVariant.findUnique({
-        where: { id },
-    });
-    if (!existingVariant) {
-        throw new AppError(404, "Variant not found");
-    }
-    return prisma.productVariant.delete({ where: { id } });
-}
 //# sourceMappingURL=product-variant.service.js.map

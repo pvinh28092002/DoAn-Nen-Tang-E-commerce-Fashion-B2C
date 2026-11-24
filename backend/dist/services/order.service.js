@@ -23,6 +23,9 @@ export async function createOrder(userId, orderData) {
     }
     //validate stock availability for each item
     for (const item of cartItems) {
+        if (!item.variant.isActive) {
+            throw new AppError(400, `Product variant ${item.variant.sku} is no longer available.`);
+        }
         if (item.variant.stockQuantity < item.quantity) {
             throw new AppError(400, `Insufficient stock for product: ${item.variant.product.name}`);
         }
@@ -100,7 +103,7 @@ export async function createOrder(userId, orderData) {
                     address: deliveryAddress.address,
                     city: deliveryAddress.city,
                     district: deliveryAddress.district,
-                    ward: deliveryAddress.ward || null,
+                    ward: deliveryAddress.ward || "",
                     isDefault: false,
                 },
             });
@@ -109,6 +112,7 @@ export async function createOrder(userId, orderData) {
             const result = await tx.productVariant.updateMany({
                 where: {
                     id: item.variantId,
+                    isActive: true,
                     stockQuantity: { gte: item.quantity },
                 },
                 data: {

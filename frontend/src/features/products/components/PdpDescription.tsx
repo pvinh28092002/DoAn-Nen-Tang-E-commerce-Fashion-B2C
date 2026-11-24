@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Product } from "../types";
 import { formatPrice } from "../utils";
 import { createCartItem } from "../../carts/api";
@@ -8,8 +8,18 @@ interface ProductCardProps {
 }
 
 const ProductSelector: React.FC<ProductCardProps> = ({ product }) => {
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(() => {
+    const firstAvailable = product.variants.find(
+      (variant) => variant.isActive && variant.stockQuantity > 0,
+    );
+    return firstAvailable?.color ?? null;
+  });
+  const [selectedSize, setSelectedSize] = useState<string | null>(() => {
+    const firstAvailable = product.variants.find(
+      (variant) => variant.isActive && variant.stockQuantity > 0,
+    );
+    return firstAvailable?.size ?? null;
+  });
 
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,7 +29,7 @@ const ProductSelector: React.FC<ProductCardProps> = ({ product }) => {
   const availableColors = Array.from(
     new Set(
       product.variants
-        .filter((variant) => variant.stockQuantity > 0)
+        .filter((variant) => variant.isActive && variant.stockQuantity > 0)
         .map((variant) => variant.color)
         .filter((color): color is string => Boolean(color)),
     ),
@@ -30,6 +40,7 @@ const ProductSelector: React.FC<ProductCardProps> = ({ product }) => {
     new Set(
       product.variants
         .filter((variant) => variant.color === selectedColor)
+        .filter((variant) => variant.isActive)
         .filter((variant) => variant.stockQuantity > 0)
         .map((variant) => variant.size)
         .filter((size): size is string => Boolean(size)),
@@ -41,25 +52,11 @@ const ProductSelector: React.FC<ProductCardProps> = ({ product }) => {
     (variant) =>
       variant.color === selectedColor &&
       variant.size === selectedSize &&
+      variant.isActive &&
       variant.stockQuantity > 0,
   );
 
-  // 4. Set an initial color and size.
-  useEffect(() => {
-    const defaultOption = product.variants.find(
-      (variant) => variant.stockQuantity > 0,
-    );
-
-    if (defaultOption) {
-      setSelectedColor(defaultOption.color);
-      setSelectedSize(defaultOption.size);
-    } else {
-      setSelectedColor(null);
-      setSelectedSize(null);
-    }
-  }, [product]);
-
-  // 5. Handle color selection.
+  // Handle color selection.
 
   function handleColorChange(color: string) {
     const firstAvailableVariant = product.variants.find(

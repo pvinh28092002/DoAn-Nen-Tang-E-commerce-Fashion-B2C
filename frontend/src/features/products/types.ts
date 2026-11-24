@@ -3,6 +3,7 @@ export type ProductStatus = "ACTIVE" | "INACTIVE" | "ARCHIVED";
 export interface ProductVariant {
   id: string;
   productId: string;
+  isActive: boolean;
   size: string | null;
   color: string | null;
   price: string;
@@ -51,13 +52,7 @@ export interface CreateProductVariantInput {
 /** Payload accepted by PUT /product-variants/:id. */
 export type UpdateProductVariantInput = Partial<
   Omit<CreateProductVariantInput, "productId">
->;
-
-export interface DeleteProductResponse<T> {
-  success: boolean;
-  message: string;
-  deletedProduct: T;
-}
+> & { isActive?: boolean };
 
 export interface ApiResponse<T> {
   success: boolean;

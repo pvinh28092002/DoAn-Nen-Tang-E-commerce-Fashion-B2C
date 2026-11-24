@@ -90,7 +90,7 @@ export default function ProductDetailPage() {
 
       {/* RIGHT: product info */}
       <div className="lg:sticky lg:top-24 lg:self-start">
-        <PdpDetail product={product} />
+        <PdpDetail key={product.id} product={product} />
       </div>
     </div>
   );

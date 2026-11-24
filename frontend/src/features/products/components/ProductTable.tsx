@@ -6,14 +6,12 @@ interface ProductTableProps {
   products: Product[];
   categories: Category[];
   onEdit: (product: Product) => void;
-  onDelete: (product: Product) => void;
 }
 
 export default function ProductTable({
   products,
   categories,
   onEdit,
-  onDelete,
 }: ProductTableProps) {
   const getCategoryName = (categoryId: string) => {
     return (
@@ -95,14 +93,6 @@ export default function ProductTable({
                     className="text-blue-600 hover:underline"
                   >
                     Edit
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => onDelete(product)}
-                    className="text-red-600 hover:underline"
-                  >
-                    Delete
                   </button>
                 </div>
               </td>

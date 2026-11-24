@@ -9,7 +9,8 @@ import type {
 interface CheckoutFormProps {
   addresses: SavedAddress[];
   onSubmit: (data: CheckoutRequest) => void;
-  isSubmitting: boolean;    
+  isSubmitting: boolean;
+  hasUnavailableItems?: boolean;
 }
 
 const emptyAddress: DeliveryAddress = {
@@ -25,6 +26,7 @@ export default function CheckoutForm({
   addresses,
   onSubmit,
   isSubmitting,
+  hasUnavailableItems = false,
 }: CheckoutFormProps) {
   const defaultAddress = addresses.find((address) => address.isDefault);
 
@@ -221,10 +223,14 @@ export default function CheckoutForm({
 
       <button
         type="submit"
-        disabled={isSubmitting || (!useNewAddress && !selectedAddressId)}
+        disabled={isSubmitting || hasUnavailableItems || (!useNewAddress && !selectedAddressId)}
         className="w-full bg-black p-4 text-white disabled:opacity-50"
       >
-        {isSubmitting ? "Processing..." : "Place Order"}
+        {isSubmitting
+          ? "Processing..."
+          : hasUnavailableItems
+            ? "Update your cart to continue"
+            : "Place Order"}
       </button>
     </form>
   );

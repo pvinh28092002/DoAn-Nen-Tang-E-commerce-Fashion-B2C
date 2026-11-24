@@ -3,18 +3,31 @@ import type {
   ApiResponse,
   CreateProductInput,
   CreateProductVariantInput,
-  DeleteProductResponse,
   Product,
   ProductVariant,
   UpdateProductInput,
   UpdateProductVariantInput,
 } from "./types";
 
-export async function getProducts(): Promise<Product[]> {
+export async function getActiveProducts(): Promise<Product[]> {
   const response = await apiRequest<ApiResponse<Product[]>>("/products");
   if (!response.success) {
-    throw new Error("Failed to fetch products");
+    throw new Error("Failed to fetch active products");
   }
+  return response.data;
+}
+
+export async function getAllProductsAdmin(): Promise<Product[]> {
+  const response = await apiRequest<ApiResponse<Product[]>>("/products/admin/all");
+  if (!response.success) throw new Error("Failed to fetch products");
+  return response.data;
+}
+
+export async function getProductByIdAdmin(id: string): Promise<Product> {
+  const response = await apiRequest<ApiResponse<Product>>(
+    `/products/admin/${encodeURIComponent(id)}`,
+  );
+  if (!response.success) throw new Error("Failed to fetch product");
   return response.data;
 }
 
@@ -59,17 +72,6 @@ export async function updateProduct(
   return response.data;
 }
 
-export async function deleteProduct(
-  id: string,
-): Promise<DeleteProductResponse<Product>> {
-  const response = await apiRequest<DeleteProductResponse<Product>>(
-    `/products/${encodeURIComponent(id)}`,
-    { method: "DELETE" },
-  );
-  if (!response.success) throw new Error("Failed to delete product");
-  return response;
-}
-
 export async function getProductVariantById(
   id: string,
 ): Promise<ProductVariant> {
@@ -110,16 +112,5 @@ export async function updateProductVariant(
     { method: "PUT", body: input },
   );
   if (!response.success) throw new Error("Failed to update product variant");
-  return response.data;
-}
-
-export async function deleteProductVariant(
-  id: string,
-): Promise<ProductVariant> {
-  const response = await apiRequest<ApiResponse<ProductVariant>>(
-    `/product-variants/${encodeURIComponent(id)}`,
-    { method: "DELETE" },
-  );
-  if (!response.success) throw new Error("Failed to delete product variant");
   return response.data;
 }

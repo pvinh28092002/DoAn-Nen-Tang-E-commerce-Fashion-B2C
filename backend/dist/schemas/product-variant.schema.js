@@ -9,6 +9,7 @@ export const createProductVariantSchema = z.object({
     images: z.array(z.string().url()).optional(),
 });
 export const updateProductVariantSchema = z.object({
+    isActive: z.boolean().optional(),
     price: z.number().positive().optional(),
     stock: z.number().int().nonnegative().optional(),
     sku: z.string().trim().min(1).optional(),

@@ -4,7 +4,11 @@ export async function getCart(userId) {
     const cart = await prisma.cart.findUnique({
         where: { userId },
         include: {
-            items: true,
+            items: {
+                include: {
+                    variant: { include: { product: { select: { name: true, status: true } } } },
+                },
+            },
         },
     });
     if (!cart) {
@@ -21,20 +25,31 @@ export async function createCartItem(userId, data) {
     }
     const existingVariant = await prisma.productVariant.findUnique({
         where: { id: data.variantId },
+        include: { product: true },
     });
     if (!existingVariant) {
         throw new AppError(404, "Product variant not found");
+    }
+    if (!existingVariant.isActive || existingVariant.product.status !== "ACTIVE") {
+        throw new AppError(400, "This product variant is not available");
     }
     const existingCartItem = await prisma.cartItem.findFirst({
         where: { cartId: existingCart.id, variantId: data.variantId },
     });
     if (existingCartItem) {
+        const newQuantity = existingCartItem.quantity + data.quantity;
+        if (newQuantity > existingVariant.stockQuantity) {
+            throw new AppError(400, "Requested quantity exceeds available stock");
+        }
         return prisma.cartItem.update({
             where: { id: existingCartItem.id },
             data: {
-                quantity: existingCartItem.quantity + data.quantity,
+                quantity: newQuantity,
             },
         });
+    }
+    if (data.quantity > existingVariant.stockQuantity) {
+        throw new AppError(400, "Requested quantity exceeds available stock");
     }
     return prisma.cartItem.create({
         data: {
@@ -61,6 +76,16 @@ export async function updateCartItemQuantity(userId, variantId, quantity) {
     });
     if (!existingCartItem) {
         throw new AppError(404, "Cart item not found");
+    }
+    const variant = await prisma.productVariant.findUnique({
+        where: { id: variantId },
+        include: { product: true },
+    });
+    if (!variant || !variant.isActive || variant.product.status !== "ACTIVE") {
+        throw new AppError(400, "This product variant is not available");
+    }
+    if (quantity > variant.stockQuantity) {
+        throw new AppError(400, "Requested quantity exceeds available stock");
     }
     // 3. Update its quantity
     return prisma.cartItem.update({

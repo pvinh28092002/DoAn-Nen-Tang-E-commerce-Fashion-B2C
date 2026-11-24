@@ -3,7 +3,6 @@ import {
   getVariantBySku,
   createVariant,
   updateVariant,
-  deleteVariant,
 } from "../services/product-variant.service.js";
 import { Request, Response, NextFunction } from "express";
 import {
@@ -89,23 +88,6 @@ export async function handleUpdateVariant(
     res.status(200).json({
       success: true,
       data: newVariant,
-    });
-  } catch (error) {
-    next(error);
-  }
-}
-
-export async function handleDeleteVariant(
-  req: Request<{ id: string }>,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
-  try {
-    const variantId = req.params.id;
-    const deletedVariant = await deleteVariant(variantId);
-    res.status(200).json({
-      success: true,
-      data: deletedVariant,
     });
   } catch (error) {
     next(error);

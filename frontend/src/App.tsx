@@ -19,6 +19,7 @@ import ProtectedRoute, {
   AdminProtectedRoute,
 } from "./components/ProtectedRoute";
 import ProductsPage from "./pages/admin/ProductsPage";
+import ProductEditPage from "./pages/admin/ProductEditPage";
 import OrdersPage from "./pages/admin/OrdersPage";
 
 export default function App() {
@@ -48,6 +49,7 @@ export default function App() {
           <Route index element={<DashboardPage />} />
           <Route path="categories" element={<CategoriesPage />} />
           <Route path="products" element={<ProductsPage />} />
+          <Route path="products/:productId" element={<ProductEditPage />} />
           <Route path="orders" element={<OrdersPage />} />
         </Route>
       </Route>

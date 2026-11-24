@@ -13,6 +13,7 @@ type CreateProductVariantData = {
 
 type UpdateProductVariantData = {
   productId?: string;
+  isActive?: boolean;
   price?: number;
   stock?: number;
   sku?: string;
@@ -120,15 +121,4 @@ export async function updateVariant(
       }),
     },
   });
-}
-
-//Delete
-export async function deleteVariant(id: string) {
-  const existingVariant = await prisma.productVariant.findUnique({
-    where: { id },
-  });
-  if (!existingVariant) {
-    throw new AppError(404, "Variant not found");
-  }
-  return prisma.productVariant.delete({ where: { id } });
 }

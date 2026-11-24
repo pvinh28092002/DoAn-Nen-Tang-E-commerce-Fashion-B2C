@@ -1,8 +1,8 @@
 import { createProductSchema, updateProductSchema, } from "../schemas/product.schema.js";
-import { createProduct, getProductById, getProducts, updateProduct, deleteProduct, getVariantsByProductId, } from "../services/product.service.js";
-export async function handleGetProducts(req, res, next) {
+import { createProduct, getActiveProductById, getActiveProducts, getProductById, getProducts, updateProduct, getVariantsByProductId, } from "../services/product.service.js";
+export async function handleGetActiveProducts(req, res, next) {
     try {
-        const products = await getProducts();
+        const products = await getActiveProducts();
         res.status(200).json({
             success: true,
             data: products,
@@ -12,14 +12,32 @@ export async function handleGetProducts(req, res, next) {
         next(error);
     }
 }
+export async function handleGetProductsAdmin(req, res, next) {
+    try {
+        const products = await getProducts();
+        res.status(200).json({ success: true, data: products });
+    }
+    catch (error) {
+        next(error);
+    }
+}
 export async function handleGetProductById(req, res, next) {
     try {
         const { id } = req.params;
-        const product = await getProductById(id);
+        const product = await getActiveProductById(id);
         res.status(200).json({
             success: true,
             data: product,
         });
+    }
+    catch (error) {
+        next(error);
+    }
+}
+export async function handleGetProductByIdAdmin(req, res, next) {
+    try {
+        const product = await getProductById(req.params.id);
+        res.status(200).json({ success: true, data: product });
     }
     catch (error) {
         next(error);
@@ -75,19 +93,6 @@ export async function handleUpdateProduct(req, res, next) {
         res.status(200).json({
             success: true,
             data: updatedProduct,
-        });
-    }
-    catch (error) {
-        next(error);
-    }
-}
-export async function handleDeleteProduct(req, res, next) {
-    try {
-        const deletedProduct = await deleteProduct(req.params.id);
-        res.status(200).json({
-            success: true,
-            message: "Product deleted successfully",
-            deletedProduct,
         });
     }
     catch (error) {

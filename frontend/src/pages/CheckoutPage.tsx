@@ -111,6 +111,14 @@ export default function CheckoutPage() {
     }
   }
 
+  const hasUnavailableItems = cartItems.some(
+    (item) =>
+      !item.variant.isActive ||
+      item.variant.product?.status === "INACTIVE" ||
+      item.variant.product?.status === "ARCHIVED" ||
+      item.quantity > item.variant.stockQuantity,
+  );
+
   return (
     <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="mb-10">
@@ -159,6 +167,12 @@ export default function CheckoutPage() {
               {error}
             </div>
           )}
+          {hasUnavailableItems && (
+            <div className="mb-6 border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              One or more cart items are inactive or exceed current stock. Remove or adjust them in your{" "}
+              <Link to="/cart" className="font-medium underline">cart</Link> to continue.
+            </div>
+          )}
 
           <div className="grid gap-10 lg:grid-cols-3">
             <section className="lg:col-span-2">
@@ -166,6 +180,7 @@ export default function CheckoutPage() {
                 addresses={addresses}
                 onSubmit={handleCheckout}
                 isSubmitting={isSubmitting}
+                hasUnavailableItems={hasUnavailableItems}
               />
             </section>
 

@@ -1,4 +1,8 @@
-import type { ProductVariant } from "../products/types";
+import type { ProductStatus, ProductVariant } from "../products/types";
+
+export type CartProductVariant = ProductVariant & {
+  product?: { name: string; status: ProductStatus };
+};
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -12,7 +16,7 @@ export interface CartItem {
   quantity: number;
   createdAt: string;
   updatedAt: string;
-  variant: ProductVariant;
+  variant: CartProductVariant;
 }
 
 export interface AddCartItem {

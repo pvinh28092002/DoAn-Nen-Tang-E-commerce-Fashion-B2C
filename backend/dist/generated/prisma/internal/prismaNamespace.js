@@ -132,6 +132,7 @@ export const ProductScalarFieldEnum = {
 export const ProductVariantScalarFieldEnum = {
     id: 'id',
     productId: 'productId',
+    isActive: 'isActive',
     size: 'size',
     color: 'color',
     price: 'price',

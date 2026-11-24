@@ -5,7 +5,6 @@ import {
   handleGetVariantsBySku,
   handleCreateVariant,
   handleUpdateVariant,
-  handleDeleteVariant,
 } from "../controllers/product-variant.controller.js";
 import { requireRole } from "../middlewares/role.middleware.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
@@ -19,5 +18,4 @@ router.use(requireRole("ADMIN"));
 
 router.post("/", handleCreateVariant);
 router.put("/:id", handleUpdateVariant);
-router.delete("/:id", handleDeleteVariant);
 export default router;

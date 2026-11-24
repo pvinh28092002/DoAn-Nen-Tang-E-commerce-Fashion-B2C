@@ -6,24 +6,38 @@ import {
 import { Request, Response, NextFunction } from "express";
 import {
   createProduct,
+  getActiveProductById,
+  getActiveProducts,
   getProductById,
   getProducts,
   updateProduct,
-  deleteProduct,
   getVariantsByProductId,
 } from "../services/product.service.js";
 
-export async function handleGetProducts(
+export async function handleGetActiveProducts(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const products = await getActiveProducts();
+    res.status(200).json({
+      success: true,
+      data: products,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function handleGetProductsAdmin(
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> {
   try {
     const products = await getProducts();
-    res.status(200).json({
-      success: true,
-      data: products,
-    });
+    res.status(200).json({ success: true, data: products });
   } catch (error) {
     next(error);
   }
@@ -36,11 +50,24 @@ export async function handleGetProductById(
 ): Promise<void> {
   try {
     const { id } = req.params;
-    const product = await getProductById(id);
+    const product = await getActiveProductById(id);
     res.status(200).json({
       success: true,
       data: product,
     });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function handleGetProductByIdAdmin(
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const product = await getProductById(req.params.id);
+    res.status(200).json({ success: true, data: product });
   } catch (error) {
     next(error);
   }
@@ -107,23 +134,6 @@ export async function handleUpdateProduct(
     res.status(200).json({
       success: true,
       data: updatedProduct,
-    });
-  } catch (error) {
-    next(error);
-  }
-}
-
-export async function handleDeleteProduct(
-  req: Request<{ id: string }>,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
-  try {
-    const deletedProduct = await deleteProduct(req.params.id);
-    res.status(200).json({
-      success: true,
-      message: "Product deleted successfully",
-      deletedProduct,
     });
   } catch (error) {
     next(error);

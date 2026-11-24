@@ -11,7 +11,7 @@ export interface ProductVariantFormData {
 }
 
 interface ProductVariantFormProps {
-  onAdd: (variant: ProductVariantFormData) => boolean;
+  onAdd: (variant: ProductVariantFormData) => boolean | Promise<boolean>;
   disabled?: boolean;
 }
 
@@ -26,8 +26,10 @@ export default function ProductVariantForm({
   const [stock, setStock] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
 
-  function handleAdd() {
+  async function handleAdd() {
+    if (isAdding || disabled) return;
     const numericPrice = Number(price);
     const numericStock = Number(stock);
     if (
@@ -43,26 +45,33 @@ export default function ProductVariantForm({
       return;
     }
 
-    const added = onAdd({
-      size,
-      color,
-      sku: sku.trim(),
-      price: numericPrice,
-      stock: numericStock,
-      images,
-    });
-    if (!added) {
-      setError("This SKU is already in the variant list.");
-      return;
-    }
+    setIsAdding(true);
+    try {
+      const added = await onAdd({
+        size,
+        color,
+        sku: sku.trim(),
+        price: numericPrice,
+        stock: numericStock,
+        images,
+      });
+      if (!added) {
+        setError("This SKU is already in the variant list.");
+        return;
+      }
 
-    setError(null);
-    setSize("");
-    setColor("");
-    setSku("");
-    setPrice("");
-    setStock("");
-    setImages([]);
+      setError(null);
+      setSize("");
+      setColor("");
+      setSku("");
+      setPrice("");
+      setStock("");
+      setImages([]);
+    } catch (addError: unknown) {
+      setError(addError instanceof Error ? addError.message : "Could not add variant.");
+    } finally {
+      setIsAdding(false);
+    }
   }
 
   return (
@@ -74,7 +83,7 @@ export default function ProductVariantForm({
         <input
           value={size}
           onChange={(e) => setSize(e.target.value)}
-          disabled={disabled}
+          disabled={disabled || isAdding}
           placeholder="e.g. M, L, XL"
         />
       </div>
@@ -84,7 +93,7 @@ export default function ProductVariantForm({
         <input
           value={color}
           onChange={(e) => setColor(e.target.value)}
-          disabled={disabled}
+          disabled={disabled || isAdding}
         />
       </div>
 
@@ -94,7 +103,7 @@ export default function ProductVariantForm({
           value={sku}
           onChange={(e) => setSku(e.target.value)}
           required
-          disabled={disabled}
+          disabled={disabled || isAdding}
         />
       </div>
 
@@ -107,7 +116,7 @@ export default function ProductVariantForm({
           value={price}
           onChange={(e) => setPrice(e.target.value)}
           required
-          disabled={disabled}
+          disabled={disabled || isAdding}
         />
       </div>
 
@@ -120,11 +129,11 @@ export default function ProductVariantForm({
           value={stock}
           onChange={(e) => setStock(e.target.value)}
           required
-          disabled={disabled}
+          disabled={disabled || isAdding}
         />
       </div>
 
-      <ImageUploader images={images} onChange={setImages} />
+        <ImageUploader images={images} onChange={setImages} />
 
       {error && (
         <p role="alert" className="text-sm text-red-600">
@@ -135,9 +144,9 @@ export default function ProductVariantForm({
       <button
         type="button"
         onClick={handleAdd}
-        disabled={disabled || !sku.trim() || !price || !stock}
+        disabled={disabled || isAdding || !sku.trim() || !price || !stock}
       >
-        Add Variant
+        {isAdding ? "Adding..." : "Add Variant"}
       </button>
     </div>
   );
