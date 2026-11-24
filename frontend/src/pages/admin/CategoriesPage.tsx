@@ -13,16 +13,34 @@ import type { Category, CategoryInput } from "../../features/categories/types";
 
 import CategoryTable from "../../features/categories/components/CategoryTable";
 import CategoryForm from "../../features/categories/components/CategoryForm";
+import Pagination from "../../components/Pagination";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null,
+  );
+
+  const query = search.trim().toLocaleLowerCase();
+  const filteredCategories = categories.filter((category) => {
+    return (
+      category.name.toLocaleLowerCase().includes(query) ||
+      category.slug.toLocaleLowerCase().includes(query)
+    );
+  });
+  const totalPages = Math.ceil(filteredCategories.length / pageSize);
+  const currentPage = totalPages === 0 ? 1 : Math.min(page, totalPages);
+  const visibleCategories = filteredCategories.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
   );
 
   const fetchCategories = async () => {
@@ -123,24 +141,58 @@ export default function CategoriesPage() {
         </div>
       )}
 
-      <div className="mb-4 text-sm text-gray-500">
-        {categories.length} categories
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <label className="sr-only" htmlFor="category-search">
+          Search categories
+        </label>
+        <input
+          id="category-search"
+          type="search"
+          value={search}
+          onChange={(event) => {
+            setSearch(event.target.value);
+            setPage(1);
+          }}
+          placeholder="Search by category name or slug"
+          className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 sm:max-w-sm"
+        />
+        <p className="text-sm text-gray-500">
+          {filteredCategories.length}{" "}
+          {filteredCategories.length === 1 ? "category" : "categories"}
+        </p>
       </div>
 
       {loading ? (
         <div className="rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-500">
           Loading categories...
         </div>
-      ) : categories.length === 0 ? (
+      ) : filteredCategories.length === 0 ? (
         <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-          <p className="text-gray-600">No categories found.</p>
+          <p className="text-gray-600">
+            {categories.length === 0
+              ? "No categories found."
+              : "No categories match your search."}
+          </p>
         </div>
       ) : (
-        <CategoryTable
-          categories={categories}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        <div className="space-y-4">
+          <CategoryTable
+            categories={visibleCategories}
+            parentCategories={categories}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+          <Pagination
+            page={currentPage}
+            pageSize={pageSize}
+            totalItems={filteredCategories.length}
+            onPageChange={setPage}
+            onPageSizeChange={(nextPageSize) => {
+              setPageSize(nextPageSize);
+              setPage(1);
+            }}
+          />
+        </div>
       )}
 
       {isFormOpen && (

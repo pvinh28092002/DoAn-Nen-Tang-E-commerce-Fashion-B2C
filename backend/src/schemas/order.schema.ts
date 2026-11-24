@@ -37,6 +37,15 @@ const paymentStatusSchema = z.enum([
   "FAILED",
   "REFUNDED",
 ]);
+
+export const adminOrdersQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(10),
+  search: z.string().trim().max(200).optional().default(""),
+  status: orderStatusSchema.optional(),
+  paymentStatus: paymentStatusSchema.optional(),
+});
+
 export const updateOrderStatusSchema = z
   .object({
     orderStatus: orderStatusSchema.optional(),

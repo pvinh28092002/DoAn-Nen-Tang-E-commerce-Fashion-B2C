@@ -12,6 +12,22 @@ export interface UpdateOrderStatusInput {
   paymentStatus?: PaymentStatus;
 }
 
+export interface AdminOrdersQuery {
+  page: number;
+  pageSize: number;
+  search?: string;
+  status?: OrderStatus;
+  paymentStatus?: PaymentStatus;
+}
+
+export interface PaginatedResult<T> {
+  items: T[];
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+}
+
 export interface DeliveryAddress {
   recipient: string;
   phone: string;

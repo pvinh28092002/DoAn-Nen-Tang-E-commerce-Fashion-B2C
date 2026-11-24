@@ -1,6 +1,7 @@
 import { prisma } from "../config/prisma.js";
 import { AppError } from "../errors/app-error.js";
 import {
+  adminOrdersQuerySchema,
   checkoutSchema,
   updateOrderStatusSchema,
 } from "../schemas/order.schema.js";
@@ -8,6 +9,7 @@ import { z } from "zod";
 import { Prisma } from "../generated/prisma/client.js";
 
 type CheckoutData = z.infer<typeof checkoutSchema>;
+type AdminOrdersQuery = z.infer<typeof adminOrdersQuerySchema>;
 
 export async function createOrder(
   userId: string,
@@ -270,11 +272,38 @@ export async function getOrderById(userId: string, orderId: string) {
   return order;
 }
 
-export async function getAllOrdersAdmin() {
-  const orders = await prisma.order.findMany({
-    include: { items: true, payment: true },
-  });
-  return orders;
+export async function getAllOrdersAdmin(query: AdminOrdersQuery) {
+  const { page, pageSize, search, status, paymentStatus } = query;
+  const where: Prisma.OrderWhereInput = {
+    ...(status && { status }),
+    ...(paymentStatus && { paymentStatus }),
+    ...(search && {
+      OR: [
+        { id: { contains: search, mode: "insensitive" } },
+        { recipient: { contains: search, mode: "insensitive" } },
+        { phone: { contains: search } },
+      ],
+    }),
+  };
+
+  const [items, totalItems] = await prisma.$transaction([
+    prisma.order.findMany({
+      where,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      include: { items: true, payment: true },
+    }),
+    prisma.order.count({ where }),
+  ]);
+
+  return {
+    items,
+    page,
+    pageSize,
+    totalItems,
+    totalPages: Math.ceil(totalItems / pageSize),
+  };
 }
 
 type OrderStatusData = z.infer<typeof updateOrderStatusSchema>;

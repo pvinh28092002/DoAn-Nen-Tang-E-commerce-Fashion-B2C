@@ -2,12 +2,14 @@ import type { Category } from "../types";
 
 interface CategoryTableProps {
   categories: Category[];
+  parentCategories?: Category[];
   onEdit: (category: Category) => void;
   onDelete: (category: Category) => void;
 }
 
 export default function CategoryTable({
   categories,
+  parentCategories = categories,
   onEdit,
   onDelete,
 }: CategoryTableProps) {
@@ -15,7 +17,8 @@ export default function CategoryTable({
     if (!parentId) return "Root category";
 
     return (
-      categories.find((category) => category.id === parentId)?.name ?? "Unknown"
+      parentCategories.find((category) => category.id === parentId)?.name ??
+      "Unknown"
     );
   };
 

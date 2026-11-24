@@ -1,8 +1,10 @@
 import { apiRequest } from "../../lib/api-client";
 import type {
   ApiResponse,
+  AdminOrdersQuery,
   CheckoutRequest,
   Order,
+  PaginatedResult,
   UpdateOrderStatusInput,
 } from "./types";
 
@@ -45,8 +47,20 @@ export async function cancelOrder(id: string): Promise<Order> {
 }
 
 //Admin
-export async function getAllOrdersAdmin(): Promise<Order[]> {
-  const response = await apiRequest<ApiResponse<Order[]>>("/orders/admin/all");
+export async function getAllOrdersAdmin(
+  query: AdminOrdersQuery,
+): Promise<PaginatedResult<Order>> {
+  const params = new URLSearchParams({
+    page: String(query.page),
+    pageSize: String(query.pageSize),
+  });
+  if (query.search?.trim()) params.set("search", query.search.trim());
+  if (query.status) params.set("status", query.status);
+  if (query.paymentStatus) params.set("paymentStatus", query.paymentStatus);
+
+  const response = await apiRequest<ApiResponse<PaginatedResult<Order>>>(
+    `/orders/admin/all?${params.toString()}`,
+  );
   if (!response.success) throw new Error("Failed to fetch all orders");
   return response.data;
 }

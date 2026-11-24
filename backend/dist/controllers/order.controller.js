@@ -1,4 +1,4 @@
-import { checkoutSchema, updateOrderStatusSchema, } from "../schemas/order.schema.js";
+import { adminOrdersQuerySchema, checkoutSchema, updateOrderStatusSchema, } from "../schemas/order.schema.js";
 import { createOrder, getOrders, getOrderById, cancelOrderById, getAllOrdersAdmin, updateOrderStatus, } from "../services/order.service.js";
 export async function handleCreateOrder(req, res, next) {
     try {
@@ -66,7 +66,16 @@ export async function handleCancelOrder(req, res, next) {
 }
 export async function handleGetAllOrdersAdmin(req, res, next) {
     try {
-        const orders = await getAllOrdersAdmin();
+        const result = adminOrdersQuerySchema.safeParse(req.query);
+        if (!result.success) {
+            res.status(400).json({
+                success: false,
+                message: "Invalid order query parameters",
+                errors: result.error.flatten().fieldErrors,
+            });
+            return;
+        }
+        const orders = await getAllOrdersAdmin(result.data);
         res.status(200).json({
             success: true,
             data: orders,

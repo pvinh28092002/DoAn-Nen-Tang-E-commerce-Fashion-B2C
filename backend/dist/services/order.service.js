@@ -215,11 +215,36 @@ export async function getOrderById(userId, orderId) {
     }
     return order;
 }
-export async function getAllOrdersAdmin() {
-    const orders = await prisma.order.findMany({
-        include: { items: true, payment: true },
-    });
-    return orders;
+export async function getAllOrdersAdmin(query) {
+    const { page, pageSize, search, status, paymentStatus } = query;
+    const where = {
+        ...(status && { status }),
+        ...(paymentStatus && { paymentStatus }),
+        ...(search && {
+            OR: [
+                { id: { contains: search, mode: "insensitive" } },
+                { recipient: { contains: search, mode: "insensitive" } },
+                { phone: { contains: search } },
+            ],
+        }),
+    };
+    const [items, totalItems] = await prisma.$transaction([
+        prisma.order.findMany({
+            where,
+            orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+            include: { items: true, payment: true },
+        }),
+        prisma.order.count({ where }),
+    ]);
+    return {
+        items,
+        page,
+        pageSize,
+        totalItems,
+        totalPages: Math.ceil(totalItems / pageSize),
+    };
 }
 export async function updateOrderStatus(orderId, updateData) {
     const { orderStatus, paymentStatus } = updateData;

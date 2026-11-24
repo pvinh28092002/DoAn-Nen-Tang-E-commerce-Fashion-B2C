@@ -4,6 +4,8 @@ import { formatPrice } from "../../../lib/format-price";
 interface OrderTableProps {
   orders: Order[];
   onView: (order: Order) => void;
+  emptyTitle?: string;
+  emptyMessage?: string;
 }
 
 const orderStatusStyles: Record<OrderStatus, string> = {
@@ -32,12 +34,17 @@ function formatDate(value: string) {
     : date.toLocaleString("vi-VN", { dateStyle: "medium", timeStyle: "short" });
 }
 
-export default function OrderTable({ orders, onView }: OrderTableProps) {
+export default function OrderTable({
+  orders,
+  onView,
+  emptyTitle = "No orders yet",
+  emptyMessage = "New customer orders will appear here.",
+}: OrderTableProps) {
   if (orders.length === 0) {
     return (
       <div className="rounded-lg border border-gray-200 bg-white px-4 py-12 text-center">
-        <h2 className="font-medium text-gray-900">No orders yet</h2>
-        <p className="mt-1 text-sm text-gray-500">New customer orders will appear here.</p>
+        <h2 className="font-medium text-gray-900">{emptyTitle}</h2>
+        <p className="mt-1 text-sm text-gray-500">{emptyMessage}</p>
       </div>
     );
   }

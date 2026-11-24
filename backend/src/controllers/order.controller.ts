@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import {
+  adminOrdersQuerySchema,
   checkoutSchema,
   updateOrderStatusSchema,
 } from "../schemas/order.schema.js";
@@ -91,12 +92,22 @@ export async function handleCancelOrder(
 }
 
 export async function handleGetAllOrdersAdmin(
-  req: Request<{ orderId: string }>,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const orders = await getAllOrdersAdmin();
+    const result = adminOrdersQuerySchema.safeParse(req.query);
+    if (!result.success) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid order query parameters",
+        errors: result.error.flatten().fieldErrors,
+      });
+      return;
+    }
+
+    const orders = await getAllOrdersAdmin(result.data);
     res.status(200).json({
       success: true,
       data: orders,
