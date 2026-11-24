@@ -1,14 +1,29 @@
 import { useEffect, useState } from "react";
-import { getAllOrdersAdmin } from "../../features/orders/api";
+import {
+  getAllOrdersAdmin,
+  updateOrderStatusAdmin,
+} from "../../features/orders/api";
 import OrderTable from "../../features/orders/components/OrderTable";
 import OrderDetailModal from "../../features/orders/components/OrderDetailModal";
-import type { Order } from "../../features/orders/types";
+import type {
+  Order,
+  UpdateOrderStatusInput,
+} from "../../features/orders/types";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const handleUpdateStatus = async (
+    id: string,
+    input: UpdateOrderStatusInput,
+  ): Promise<Order> => {
+    const updated = await updateOrderStatusAdmin(id, input);
+    setOrders((prev) => prev.map((o) => (o.id === updated.id ? updated : o)));
+    setSelectedOrder(updated);
+    return updated;
+  };
 
   useEffect(() => {
     let isCurrent = true;
@@ -57,7 +72,10 @@ export default function OrdersPage() {
           Loading orders...
         </p>
       ) : error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
+        <div
+          className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+          role="alert"
+        >
           {error}
         </div>
       ) : (
@@ -68,6 +86,7 @@ export default function OrdersPage() {
         <OrderDetailModal
           order={selectedOrder}
           onClose={() => setSelectedOrder(null)}
+          onUpdateStatus={handleUpdateStatus}
         />
       )}
     </section>

@@ -44,6 +44,7 @@ export async function cancelOrder(id: string): Promise<Order> {
   return response.data;
 }
 
+//Admin
 export async function getAllOrdersAdmin(): Promise<Order[]> {
   const response = await apiRequest<ApiResponse<Order[]>>("/orders/admin/all");
   if (!response.success) throw new Error("Failed to fetch all orders");
