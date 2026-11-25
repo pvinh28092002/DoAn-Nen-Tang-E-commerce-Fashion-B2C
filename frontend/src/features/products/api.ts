@@ -1,9 +1,11 @@
 import { apiRequest } from "../../lib/api-client";
 import type {
   ApiResponse,
+  AdminProductsQuery,
   CreateProductInput,
   CreateProductVariantInput,
   Product,
+  PaginatedProducts,
   ProductVariant,
   UpdateProductInput,
   UpdateProductVariantInput,
@@ -17,8 +19,20 @@ export async function getActiveProducts(): Promise<Product[]> {
   return response.data;
 }
 
-export async function getAllProductsAdmin(): Promise<Product[]> {
-  const response = await apiRequest<ApiResponse<Product[]>>("/products/admin/all");
+export async function getAllProductsAdmin(
+  query: AdminProductsQuery,
+): Promise<PaginatedProducts> {
+  const params = new URLSearchParams({
+    page: String(query.page),
+    pageSize: String(query.pageSize),
+  });
+  if (query.search?.trim()) params.set("search", query.search.trim());
+  if (query.categoryId) params.set("categoryId", query.categoryId);
+  if (query.status) params.set("status", query.status);
+
+  const response = await apiRequest<ApiResponse<PaginatedProducts>>(
+    `/products/admin/all?${params.toString()}`,
+  );
   if (!response.success) throw new Error("Failed to fetch products");
   return response.data;
 }

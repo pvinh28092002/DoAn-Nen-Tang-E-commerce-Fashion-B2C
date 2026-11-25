@@ -1,5 +1,21 @@
 export type ProductStatus = "ACTIVE" | "INACTIVE" | "ARCHIVED";
 
+export interface AdminProductsQuery {
+  page: number;
+  pageSize: number;
+  search?: string;
+  categoryId?: string;
+  status?: ProductStatus;
+}
+
+export interface PaginatedProducts {
+  items: Product[];
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+}
+
 export interface ProductVariant {
   id: string;
   productId: string;

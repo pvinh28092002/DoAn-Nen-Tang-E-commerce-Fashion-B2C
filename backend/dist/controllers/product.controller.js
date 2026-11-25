@@ -1,4 +1,4 @@
-import { createProductSchema, updateProductSchema, } from "../schemas/product.schema.js";
+import { adminProductsQuerySchema, createProductSchema, updateProductSchema, } from "../schemas/product.schema.js";
 import { createProduct, getActiveProductById, getActiveProducts, getProductById, getProducts, updateProduct, getVariantsByProductId, } from "../services/product.service.js";
 export async function handleGetActiveProducts(req, res, next) {
     try {
@@ -14,7 +14,16 @@ export async function handleGetActiveProducts(req, res, next) {
 }
 export async function handleGetProductsAdmin(req, res, next) {
     try {
-        const products = await getProducts();
+        const result = adminProductsQuerySchema.safeParse(req.query);
+        if (!result.success) {
+            res.status(400).json({
+                success: false,
+                message: "Invalid product query parameters",
+                errors: result.error.flatten().fieldErrors,
+            });
+            return;
+        }
+        const products = await getProducts(result.data);
         res.status(200).json({ success: true, data: products });
     }
     catch (error) {

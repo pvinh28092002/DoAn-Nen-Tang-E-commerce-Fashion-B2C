@@ -1,6 +1,11 @@
 import { prisma } from "../config/prisma.js";
 import { AppError } from "../errors/app-error.js";
 import { ProductStatus } from "../generated/prisma/browser.js";
+import { Prisma } from "../generated/prisma/client.js";
+import { adminProductsQuerySchema } from "../schemas/product.schema.js";
+import { z } from "zod";
+
+type AdminProductsQuery = z.infer<typeof adminProductsQuerySchema>;
 type CreateProductData = {
   categoryId: string;
   name: string;
@@ -25,13 +30,37 @@ export async function getActiveProducts() {
     include: { variants: { where: { isActive: true } } },
   });
 }
-export async function getProducts() {
-  return prisma.product.findMany({
-    orderBy: {
-      name: "asc",
-    },
-    include: { variants: true },
-  });
+export async function getProducts(query: AdminProductsQuery) {
+  const { page, pageSize, search, categoryId, status } = query;
+  const where: Prisma.ProductWhereInput = {
+    ...(categoryId && { categoryId }),
+    ...(status && { status }),
+    ...(search && {
+      OR: [
+        { name: { contains: search, mode: "insensitive" } },
+        { slug: { contains: search, mode: "insensitive" } },
+      ],
+    }),
+  };
+
+  const [items, totalItems] = await prisma.$transaction([
+    prisma.product.findMany({
+      where,
+      orderBy: [{ name: "asc" }, { id: "asc" }],
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      include: { variants: true },
+    }),
+    prisma.product.count({ where }),
+  ]);
+
+  return {
+    items,
+    page,
+    pageSize,
+    totalItems,
+    totalPages: Math.ceil(totalItems / pageSize),
+  };
 }
 export async function getProductById(id: string) {
   const product = await prisma.product.findUnique({

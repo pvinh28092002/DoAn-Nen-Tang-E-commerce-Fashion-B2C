@@ -1,4 +1,5 @@
 import {
+  adminProductsQuerySchema,
   createProductSchema,
   updateProductSchema,
 } from "../schemas/product.schema.js";
@@ -36,7 +37,17 @@ export async function handleGetProductsAdmin(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const products = await getProducts();
+    const result = adminProductsQuerySchema.safeParse(req.query);
+    if (!result.success) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid product query parameters",
+        errors: result.error.flatten().fieldErrors,
+      });
+      return;
+    }
+
+    const products = await getProducts(result.data);
     res.status(200).json({ success: true, data: products });
   } catch (error) {
     next(error);

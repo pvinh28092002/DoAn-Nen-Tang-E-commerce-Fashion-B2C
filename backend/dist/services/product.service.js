@@ -9,13 +9,35 @@ export async function getActiveProducts() {
         include: { variants: { where: { isActive: true } } },
     });
 }
-export async function getProducts() {
-    return prisma.product.findMany({
-        orderBy: {
-            name: "asc",
-        },
-        include: { variants: true },
-    });
+export async function getProducts(query) {
+    const { page, pageSize, search, categoryId, status } = query;
+    const where = {
+        ...(categoryId && { categoryId }),
+        ...(status && { status }),
+        ...(search && {
+            OR: [
+                { name: { contains: search, mode: "insensitive" } },
+                { slug: { contains: search, mode: "insensitive" } },
+            ],
+        }),
+    };
+    const [items, totalItems] = await prisma.$transaction([
+        prisma.product.findMany({
+            where,
+            orderBy: [{ name: "asc" }, { id: "asc" }],
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+            include: { variants: true },
+        }),
+        prisma.product.count({ where }),
+    ]);
+    return {
+        items,
+        page,
+        pageSize,
+        totalItems,
+        totalPages: Math.ceil(totalItems / pageSize),
+    };
 }
 export async function getProductById(id) {
     const product = await prisma.product.findUnique({
